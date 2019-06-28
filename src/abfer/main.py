@@ -44,18 +44,22 @@ class ABFReade(object):
         for channel in range(self._channel_count):
             x = self._create_array_for_channel(channel)
             individual_file = file_name + '_channel_{}.csv'.format(channel + 1)
+            sweep_headers = ['Sweep ' + str(x) + '_' + self._abf.sweepLabelY for x in range(self._sweep_count)]
+            header = [self._abf.sweepLabelX] + sweep_headers
+
             with open(os.path.join(file_path, individual_file), 'w', newline='') as csv_file:
                 csv_writer = csv.writer(csv_file, delimiter=',')
+                csv_writer.writerow(header)
                 csv_writer.writerows(x)
 
     def _create_array_for_channel(self, channel=0):
         n_rows = self._abf.data.shape[1] // self._sweep_count
         n_cols = self._sweep_count
-        x = np.zeros((n_rows, n_cols))
-
+        x = np.zeros((n_rows, n_cols + 1))
+        x[:, 0] = self._abf.sweepX
         for column in range(n_cols):
             self._abf.setSweep(sweepNumber=column, channel=channel)
-            x[:, column] = self._abf.data[channel, n_rows * column:(column + 1) * n_rows]
+            x[:, column + 1] = self._abf.data[channel, n_rows * column:(column + 1) * n_rows]
 
         return x
 
