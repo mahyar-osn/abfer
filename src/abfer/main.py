@@ -11,7 +11,7 @@ class ProgramArguments(object):
     pass
 
 
-class ABFReade(object):
+class ABFer(object):
 
     def __init__(self, file_name):
         self._file_name = file_name
@@ -67,7 +67,7 @@ class ABFReade(object):
 def _main():
     args = parse_args()
     if os.path.exists(args.input_file):
-        abf = ABFReade(args.input_file)
+        abf = ABFer(args.input_file)
     if args.output_path is None:
         output_csv = os.path.split(args.input_file)[0]
     if args.plot:
