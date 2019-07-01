@@ -1,3 +1,4 @@
+import sys
 import os
 import argparse
 import pyabf
@@ -25,6 +26,35 @@ class ABFer(object):
 
     def get_channel_count(self):
         return self._channel_count
+
+    def plot_abf_qt(self):
+        from pyqtgraph.Qt import QtGui, QtCore
+        import pyqtgraph as pg
+
+        app = QtGui.QApplication([])
+        win = pg.GraphicsWindow(title="Plot : {}".format(self._protocol))
+        win.resize(800, 600)
+        win.nextRow()
+
+        col = 1
+        row = 1
+        for sweep in range(self._sweep_count):
+            for channel in range(self._channel_count):
+                self._abf.setSweep(sweepNumber=sweep, channel=channel)
+                p = win.addPlot(x=self._abf.sweepX, y=self._abf.sweepY,
+                                name="Sweep {} Channel {}".format(sweep + 1, channel + 1),
+                                title="Sweep {} Channel {}".format(sweep + 1, channel + 1), row=row, col=col)
+                p.setLabel("left", self._abf.sweepLabelY)
+                if row == self._sweep_count:
+                    p.setLabel("bottom", self._abf.sweepLabelX)
+
+                col += 1
+                if col == 3:
+                    col = 1
+            row += 1
+
+        if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+            QtGui.QApplication.instance().exec_()
 
     def plot_abf(self):
         plt.figure(figsize=(8, 5))
@@ -71,7 +101,8 @@ def _main():
     if args.output_path is None:
         output_csv = os.path.split(args.input_file)[0]
     if args.plot:
-        abf.plot_abf()
+        # abf.plot_abf()
+        abf.plot_abf_qt()
     if args.save:
         abf.save_to_csv(output_csv)
     else:
